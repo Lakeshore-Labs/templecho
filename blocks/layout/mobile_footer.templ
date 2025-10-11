@@ -1,0 +1,150 @@
+// Layout006 - Footer Navigation + Bottom Drawer
+// Mobile-first layout with sticky footer navigation and bottom drawer
+package layout
+
+import (
+	"github.com/Lakeshore-Labs/templecho/auth"
+	"github.com/Lakeshore-Labs/templecho/components/button"
+	"github.com/Lakeshore-Labs/templecho/components/icon"
+	"github.com/Lakeshore-Labs/templecho/components/sheet"
+)
+
+// MobileFooter component that can be added to any layout
+templ MobileFooter() {
+	@sheet.Sheet(sheet.Props{
+		Side: sheet.SideBottom,
+	}) {
+		{{ config := GetLayoutConfig(ctx) }}
+		<nav class="fixed bottom-0 left-0 right-0 bg-background border-t z-30 lg:hidden">
+			<div class="grid grid-cols-5 h-16 items-center">
+				<!-- Mobile footer routes -->
+				for _, item := range config.MobileFooterRoutes {
+					<a href={ templ.URL(item.Path) } 
+					   hx-target="main"
+					   hx-swap="innerHTML"
+					   hx-get={ item.Path }
+					   hx-push-url="true"
+					   class={ "flex flex-col items-center justify-center gap-1 transition-colors", templ.KV("text-primary", item.IsActive), templ.KV("text-muted-foreground hover:text-foreground", !item.IsActive) }>
+						if item.Icon != nil {
+							@item.Icon
+						} else {
+							@icon.Circle(icon.Props{Size: 20})
+						}
+						<span class="text-xs">{ item.Name }</span>
+					</a>
+				}
+				
+				<!-- More button (sheet trigger) -->
+				@sheet.Trigger(sheet.TriggerProps{
+					Class: "flex justify-center",
+				}) {
+					@button.Button(button.Props{
+						Size:    button.SizeIcon,
+						Variant: button.VariantGhost,
+					}) {
+						@icon.Menu()
+					}
+				}
+			</div>
+		</nav>
+		
+		<!-- Bottom Sheet -->
+		@sheet.Content(sheet.ContentProps{
+			Class:           "!h-[75vh] sm:!h-[75vh] p-6",
+			HideCloseButton: true,
+		}) {
+			@MobileFooterDrawerContent()
+		}
+	}
+}
+
+// Keep Layout006 for backward compatibility but make it simpler
+templ Layout006() {
+	<div class="min-h-screen bg-background flex flex-col">
+		<!-- Main Content -->
+		<main class="flex-1 pb-20 lg:pb-0">
+			<div class="container mx-auto px-4 lg:px-6 py-8">
+				<!-- Content goes here -->
+				{ children... }
+			</div>
+		</main>
+		@MobileFooter()
+	</div>
+}
+
+templ MobileFooterDrawerContent() {
+	{{ config := GetLayoutConfig(ctx) }}
+	{{ user := auth.GetUserFromContext(ctx) }}
+	<div class="space-y-4">
+		<!-- Drawer Handle -->
+		<div class="w-12 h-1 bg-muted rounded-full mx-auto -mt-2"></div>
+		<!-- Header -->
+		<div class="flex items-center justify-between">
+			<h2 class="text-lg font-semibold">Menu</h2>
+			@sheet.Close() {
+				@icon.X(icon.Props{Size: 20})
+			}
+		</div>
+		
+		<!-- Navigation Section -->
+		<div class="pb-4">
+			<h3 class="text-sm font-bold text-muted-foreground mb-2">Navigation</h3>
+			<div class="space-y-2">
+				for _, item := range config.NavbarConfig.MenuItems {
+					<a href={ templ.URL(item.Path) } class={ "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors h-12", templ.KV("bg-primary/10 text-primary", item.IsActive), templ.KV("hover:bg-accent hover:text-accent-foreground", !item.IsActive) }>
+						if item.Icon != nil {
+							@item.Icon
+						} else {
+							@icon.Circle(icon.Props{Size: 16})
+						}
+						<span class="font-medium">{ item.Name }</span>
+					</a>
+				}
+			</div>
+		</div>
+		
+		<!-- User Menu Items -->
+		if user != nil && len(config.NavbarConfig.UserMenuItems) > 0 {
+			<div class="pb-4">
+				<h3 class="text-sm font-bold text-muted-foreground mb-2">Account</h3>
+				<div class="space-y-2">
+					for _, item := range config.NavbarConfig.UserMenuItems {
+						if !item.Separator {
+							<a href={ templ.URL(item.Path) } class={ "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors hover:bg-accent hover:text-accent-foreground", item.Class }>
+								if item.Icon != nil {
+									@item.Icon
+								} else {
+									@icon.Circle(icon.Props{Size: 16})
+								}
+								<span class="font-medium">{ item.Name }</span>
+							</a>
+						}
+					}
+				</div>
+			</div>
+		}
+		
+		<!-- User Profile -->
+		if user != nil {
+			<div class="border-t pt-4">
+				<div class="flex items-center gap-3">
+					<div class="h-10 w-10 bg-muted rounded-full flex items-center justify-center">
+						@icon.User(icon.Props{Size: 16})
+					</div>
+					<div class="flex-1">
+						<div class="font-medium">{ user.Name }</div>
+						<div class="text-sm text-muted-foreground">{ user.Email }</div>
+					</div>
+				</div>
+			</div>
+		} else {
+			<!-- Sign in prompt for unauthenticated users -->
+			<div class="border-t pt-4">
+				<a href="/login" class="flex items-center justify-center gap-2 w-full py-3 px-4 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors">
+					@icon.LogIn(icon.Props{Size: 16})
+					Sign In
+				</a>
+			</div>
+		}
+	</div>
+}

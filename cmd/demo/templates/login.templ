@@ -1,0 +1,157 @@
+package templates
+
+import (
+	button "github.com/Lakeshore-Labs/templecho/components/button"
+	card "github.com/Lakeshore-Labs/templecho/components/card"
+	icon "github.com/Lakeshore-Labs/templecho/components/icon"
+)
+
+// Login001 - Marketing-oriented social login page
+// Combines split-screen marketing layout with social-only authentication
+templ Login001() {
+	<div class="grid min-h-svh w-full md:grid-cols-2">
+		<!-- Marketing Content Panel -->
+		<div class="flex flex-col justify-between bg-gradient-to-b from-bg to-primary/10 p-10 md:p-12 lg:p-16">
+			<div class="flex items-center gap-2">
+				@icon.Sparkles(icon.Props{
+					Size: 24,
+				})
+				<span class="text-xl font-bold">Social Ops</span>
+			</div>
+			<div class="space-y-4">
+				<h1 class="text-3xl font-bold tracking-tight sm:text-4xl text-muted-foreground/90">
+					Welcome back to your social media command center
+				</h1>
+				<p class="md:text-lg text-muted-foreground/80">
+					Continue managing your social media presence across multiple platforms with powerful analytics and automation tools.
+				</p>
+				<ul class="grid gap-2 pt-4 text-muted-foreground/70">
+					<li class="flex items-center gap-2">
+						@icon.Check(icon.Props{
+							Size:  16,
+							Class: "text-primary",
+						})
+						<span>Multi-platform content management</span>
+					</li>
+					<li class="flex items-center gap-2">
+						@icon.Check(icon.Props{
+							Size:  16,
+							Class: "text-primary",
+						})
+						<span>Advanced analytics & insights</span>
+					</li>
+					<li class="flex items-center gap-2">
+						@icon.Check(icon.Props{
+							Size:  16,
+							Class: "text-primary",
+						})
+						<span>Automated content generation</span>
+					</li>
+					<li class="flex items-center gap-2">
+						@icon.Check(icon.Props{
+							Size:  16,
+							Class: "text-primary",
+						})
+						<span>Real-time collaboration tools</span>
+					</li>
+				</ul>
+			</div>
+			<div class="pt-8 text-sm text-muted-foreground/70">
+				© 2025 Social Ops. All rights reserved.
+			</div>
+		</div>
+		<!-- Social Login Panel -->
+		<div class="flex items-center justify-center p-8">
+			<div class="w-full max-w-md space-y-6">
+				@card.Card() {
+					@card.Header(card.HeaderProps{
+						Class: "text-center",
+					}) {
+						@card.Title(card.TitleProps{
+							Class: "text-2xl font-bold",
+						}) {
+							Welcome back
+						}
+						@card.Description() {
+							Sign in to your account with your preferred social platform
+						}
+					}
+					@card.Content(card.ContentProps{
+						Class: "space-y-4",
+					}) {
+						<div class="grid grid-cols-1 gap-3">
+							@button.Button(button.Props{
+								Variant: button.VariantOutline,
+								Class:   "w-full h-12",
+							}) {
+								@icon.Github(icon.Props{
+									Size:  18,
+									Class: "mr-3",
+								})
+								Continue with GitHub
+							}
+							<a href="/auth?provider=google" class="w-full">
+								@button.Button(button.Props{
+									Variant: button.VariantOutline,
+									Class:   "w-full h-12",
+								}) {
+									@icon.Inbox(icon.Props{
+										Size:  18,
+										Class: "mr-3",
+									})
+									Continue with Google
+								}
+							</a>
+							@button.Button(button.Props{
+								Variant: button.VariantOutline,
+								Class:   "w-full h-12",
+							}) {
+								@icon.Facebook(icon.Props{
+									Size:  18,
+									Class: "mr-3",
+								})
+								Continue with Facebook
+							}
+							@button.Button(button.Props{
+								Variant: button.VariantOutline,
+								Class:   "w-full h-12",
+							}) {
+								@icon.Twitter(icon.Props{
+									Size:  18,
+									Class: "mr-3",
+								})
+								Continue with Twitter
+							}
+						</div>
+						<div class="relative">
+							<div class="absolute inset-0 flex items-center">
+								<span class="w-full border-t"></span>
+							</div>
+							<div class="relative flex justify-center text-xs uppercase">
+								<span class="bg-background px-2 text-muted-foreground">
+									Secure & Fast Login
+								</span>
+							</div>
+						</div>
+						<div class="text-xs text-center text-muted-foreground">
+							By continuing, you agree to our
+							<a href="#" class="font-medium text-primary hover:text-primary/80">
+								Terms of Service
+							</a>
+							and
+							<a href="#" class="font-medium text-primary hover:text-primary/80">
+								Privacy Policy
+							</a>
+						</div>
+					}
+				}
+				<div class="text-center text-sm">
+					Don't have an account?
+					<a href="/marketing-split" class="font-medium text-primary hover:text-primary/80 ml-1">
+						Sign up
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+}

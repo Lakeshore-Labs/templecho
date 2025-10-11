@@ -1,0 +1,216 @@
+package profile
+
+import (
+	"strings"
+	"encoding/json"
+	"github.com/Lakeshore-Labs/templecho/components/avatar"
+	"github.com/Lakeshore-Labs/templecho/components/button"
+	"github.com/Lakeshore-Labs/templecho/components/form"
+	"github.com/Lakeshore-Labs/templecho/components/icon"
+	"github.com/Lakeshore-Labs/templecho/components/input"
+	"github.com/Lakeshore-Labs/templecho/components/label"
+	"github.com/Lakeshore-Labs/templecho/middleware"
+)
+
+templ ProfileEdit001(config ProfileConfig) {
+	<div class="container mx-auto px-4 py-8">
+		<div class="max-w-2xl mx-auto">
+			@ProfileEdit001_Header(config)
+			@ProfileEdit001_Form(config)
+		</div>
+	</div>
+}
+
+templ ProfileEdit001_Header(config ProfileConfig) {
+	<div class="mb-8">
+		<div class="flex items-center justify-between mb-2">
+			if config.ReadOnly {
+				<h2 class="text-3xl font-bold">User Profile</h2>
+			} else {
+				<h2 class="text-3xl font-bold">Edit Profile</h2>
+			}
+			if config.Provider != "" {
+				<span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-secondary text-secondary-foreground">
+					{ strings.Title(config.Provider) } Account
+				</span>
+			}
+		</div>
+		if config.ReadOnly {
+			<p class="text-muted-foreground">View your personal information and public profile</p>
+		} else {
+			<p class="text-muted-foreground">Update your personal information and manage your public profile</p>
+		}
+	</div>
+}
+
+templ ProfileEdit001_Form(config ProfileConfig) {
+	<form class="bg-card p-4 sm:p-6 lg:p-8 rounded-lg border space-y-6" action={ templ.URL(config.FormAction) } method="POST">
+		@ProfileEdit001_AvatarSection(config)
+		@ProfileEdit001_PersonalSection(config)
+		@ProfileEdit001_ContactSection(config)
+		if config.ShowDebug && config.UserMetadata != nil {
+			@ProfileEdit001_MetadataSection(config)
+		}
+		if !config.ReadOnly {
+			@ProfileEdit001_Actions()
+		}
+	</form>
+}
+
+templ ProfileEdit001_AvatarSection(config ProfileConfig) {
+	<div class="space-y-4">
+		<h3 class="text-lg font-semibold">Profile Picture</h3>
+		<div class="flex flex-col sm:flex-row items-center gap-4">
+			@avatar.Avatar(avatar.Props{Size: avatar.SizeLg}) {
+				// Try to get embedded avatar from context first
+				if avatarDataURI := middleware.GetAvatarDataURI(ctx); avatarDataURI != "" {
+					// Embedded data URI - no fallback needed
+					@avatar.Image(avatar.ImageProps{
+						Src: avatarDataURI,
+						Alt: "Profile picture",
+					})
+				} else {
+					// No avatar available, show initials
+					@avatar.Fallback() {
+						{{ fullName := config.FirstName + " " + config.LastName }}
+						{ avatar.Initials(fullName) }
+					}
+				}
+			}
+			if !config.ReadOnly {
+				<div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+					@button.Button(button.Props{
+						Type:    "button",
+						Variant: button.VariantOutline,
+						Class:   "w-full sm:w-auto",
+					}) {
+						@icon.Upload(icon.Props{Size: 16})
+						<span class="ml-2">Upload New</span>
+					}
+					@button.Button(button.Props{
+						Type:    "button",
+						Variant: button.VariantGhost,
+						Class:   "w-full sm:w-auto",
+					}) {
+						Remove
+					}
+				</div>
+			}
+		</div>
+	</div>
+}
+
+templ ProfileEdit001_PersonalSection(config ProfileConfig) {
+	<div class="space-y-4">
+		<h3 class="text-lg font-semibold">Personal Information</h3>
+		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+			@form.Item() {
+				@label.Label(label.Props{For: "account001-firstname"}) {
+					First Name
+				}
+				<div class="relative">
+					<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+						@icon.User(icon.Props{Size: 16, Class: "text-muted-foreground"})
+					</div>
+					@input.Input(input.Props{
+						ID:          "account001-firstname",
+						Name:        "firstname",
+						Placeholder: "John",
+						Value:       config.FirstName,
+						Class:       "pl-10",
+						Disabled:    config.ReadOnly,
+					})
+				</div>
+			}
+			@form.Item() {
+				@label.Label(label.Props{For: "account001-lastname"}) {
+					Last Name
+				}
+				<div class="relative">
+					<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+						@icon.User(icon.Props{Size: 16, Class: "text-muted-foreground"})
+					</div>
+					@input.Input(input.Props{
+						ID:          "account001-lastname",
+						Name:        "lastname",
+						Placeholder: "Doe",
+						Value:       config.LastName,
+						Class:       "pl-10",
+						Disabled:    config.ReadOnly,
+					})
+				</div>
+			}
+		</div>
+	</div>
+}
+
+templ ProfileEdit001_ContactSection(config ProfileConfig) {
+	<div class="space-y-4">
+		<h3 class="text-lg font-semibold">Contact Details</h3>
+		@form.Item() {
+			@label.Label(label.Props{For: "account001-email"}) {
+				Email Address
+			}
+			<div class="relative">
+				<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+					@icon.Mail(icon.Props{Size: 16, Class: "text-muted-foreground"})
+				</div>
+				@input.Input(input.Props{
+					ID:          "account001-email",
+					Name:        "email",
+					Type:        input.TypeEmail,
+					Placeholder: "john@example.com",
+					Value:       config.Email,
+					Class:       "pl-10",
+					Disabled:    true,
+				})
+			</div>
+			<p class="text-sm text-muted-foreground mt-1">We'll never share your email with anyone else</p>
+		}
+	</div>
+}
+
+
+templ ProfileEdit001_Actions() {
+	<div class="flex flex-col sm:flex-row gap-3 pt-4">
+		@button.Button(button.Props{
+			Type:    "button",
+			Variant: button.VariantOutline,
+			Class:   "w-full sm:w-auto sm:flex-1",
+		}) {
+			@icon.X(icon.Props{Size: 16})
+			<span class="ml-2">Cancel</span>
+		}
+		@button.Button(button.Props{
+			Class: "w-full sm:w-auto sm:flex-1",
+		}) {
+			@icon.Save(icon.Props{Size: 16})
+			<span class="ml-2">Save Changes</span>
+		}
+	</div>
+}
+
+templ ProfileEdit001_MetadataSection(config ProfileConfig) {
+	<div class="space-y-4">
+		<details class="group">
+			<summary class="cursor-pointer flex items-center justify-between">
+				<h3 class="text-lg font-semibold">Debug Information</h3>
+				@icon.ChevronDown(icon.Props{Size: 16, Class: "transition-transform group-open:rotate-180"})
+			</summary>
+			<div class="mt-4">
+				<pre class="bg-muted p-4 rounded-lg overflow-x-auto text-sm">
+					{ formatJSON(config.UserMetadata) }
+				</pre>
+			</div>
+		</details>
+	</div>
+}
+
+// Helper function to format JSON
+func formatJSON(data interface{}) string {
+	bytes, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		return "Error formatting JSON: " + err.Error()
+	}
+	return string(bytes)
+}

@@ -1,0 +1,123 @@
+package calendar
+
+import (
+	button "github.com/Lakeshore-Labs/templecho/components/button"
+	calendar "github.com/Lakeshore-Labs/templecho/components/calendar"
+	card "github.com/Lakeshore-Labs/templecho/components/card"
+	checkbox "github.com/Lakeshore-Labs/templecho/components/checkbox"
+	icon "github.com/Lakeshore-Labs/templecho/components/icon"
+	label "github.com/Lakeshore-Labs/templecho/components/label"
+	"time"
+)
+
+// Calendar003 - Event Calendar
+// A full calendar component with event display and filtering capabilities
+templ Calendar003() {
+	<div class="flex items-center justify-center min-h-svh w-full p-4">
+		<div class="w-full max-w-4xl">
+			@card.Card(card.Props{
+				Class: "p-6",
+			}) {
+				@card.Header(card.HeaderProps{
+					Class: "pb-6",
+				}) {
+					<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+						<div>
+							<h3 class="text-lg font-semibold">Event Calendar</h3>
+							<p class="text-sm text-muted-foreground">View and manage upcoming events</p>
+						</div>
+						<div class="flex gap-2">
+							@button.Button(button.Props{
+								Size:    "sm",
+								Variant: "outline",
+								Class:   "gap-2",
+							}) {
+								@icon.Funnel(icon.Props{Size: 16})
+								Filter
+							}
+							@button.Button(button.Props{
+								Size:  "sm",
+								Class: "gap-2",
+							}) {
+								@icon.Plus(icon.Props{Size: 16})
+								Add Event
+							}
+						</div>
+					</div>
+				}
+				@card.Content(card.ContentProps{
+					Class: "pt-0",
+				}) {
+					@Calendar003_EventCalendar()
+				}
+			}
+		</div>
+	</div>
+}
+
+templ Calendar003_EventCalendar() {
+	<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+		// Main calendar view
+		<div class="lg:col-span-2">
+			<div class="border rounded-lg p-4">
+				// Calendar component
+				@calendar.Calendar(calendar.Props{
+					Class: "w-full",
+					Value: &time.Time{},
+				})
+			</div>
+		</div>
+		// Sidebar with event list
+		<div class="space-y-4">
+			// Event type filter
+			<div class="space-y-2">
+				@label.Label() {
+					Event Types
+				}
+				<div class="space-y-2">
+					@Calendar003_EventTypeCheckbox("All Events", "all", true)
+					@Calendar003_EventTypeCheckbox("Meetings", "meetings", true)
+					@Calendar003_EventTypeCheckbox("Deadlines", "deadlines", true)
+					@Calendar003_EventTypeCheckbox("Reminders", "reminders", false)
+				</div>
+			</div>
+			// Upcoming events list
+			<div class="space-y-2">
+				<h4 class="font-medium">Upcoming Events</h4>
+				<div class="space-y-2">
+					@Calendar003_EventItem("Team Standup", "10:00 AM - 10:30 AM", "meetings")
+					@Calendar003_EventItem("Project Review", "2:00 PM - 3:00 PM", "meetings")
+					@Calendar003_EventItem("Q4 Report Due", "5:00 PM", "deadlines")
+					@Calendar003_EventItem("Client Presentation", "Tomorrow, 11:00 AM", "meetings")
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ Calendar003_EventTypeCheckbox(labelText, value string, checked bool) {
+	<div class="flex items-center gap-2">
+		@checkbox.Checkbox(checkbox.Props{
+			ID:      value + "-checkbox",
+			Name:    "event-type",
+			Value:   value,
+			Checked: checked,
+		})
+		@label.Label(label.Props{
+			For:   value + "-checkbox",
+			Class: "text-sm font-normal cursor-pointer",
+		}) {
+			{ labelText }
+		}
+	</div>
+}
+
+templ Calendar003_EventItem(title, time, eventType string) {
+	<div class="flex items-start gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors cursor-pointer">
+		<div class={ "w-2 h-2 rounded-full mt-1.5", templ.KV("bg-blue-500", eventType == "meetings"), templ.KV("bg-red-500", eventType == "deadlines"), templ.KV("bg-yellow-500", eventType == "reminders") }></div>
+		<div class="flex-1 min-w-0">
+			<p class="font-medium text-sm truncate">{ title }</p>
+			<p class="text-xs text-muted-foreground">{ time }</p>
+		</div>
+	</div>
+}

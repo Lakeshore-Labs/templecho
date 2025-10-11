@@ -1,0 +1,56 @@
+package templates
+
+import (
+	"github.com/Lakeshore-Labs/templecho/components/icon"
+	"github.com/Lakeshore-Labs/templecho/components/button"
+)
+
+// DemoLayout wraps content with a demo indicator banner
+templ DemoLayout() {
+	<!-- Demo Banner -->
+	<div class="bg-yellow-500/10 border-b border-yellow-500/20 px-4 py-2">
+		<div class="max-w-7xl mx-auto flex items-center justify-between">
+			<div class="flex items-center gap-2 text-sm">
+				@icon.TriangleAlert(icon.Props{Size: 16, Class: "text-yellow-600 dark:text-yellow-400"})
+				<span class="text-yellow-700 dark:text-yellow-300 font-medium">
+					This is a demo application showcasing UI components and layouts
+				</span>
+			</div>
+			<div class="flex items-center gap-4">
+				<span class="text-xs text-yellow-600 dark:text-yellow-400">
+					Sample data only - Not for production use
+				</span>
+				@button.Button(button.Props{
+					Variant: button.VariantGhost,
+					Size: button.SizeSm,
+					Class: "text-yellow-700 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300",
+					Attributes: templ.Attributes{
+						"onclick": "window.open('https://github.com/Lakeshore-Labs/social-ops', '_blank')",
+					},
+				}) {
+					@icon.Github(icon.Props{Size: 14, Class: "mr-1"})
+					View Source
+				}
+			</div>
+		</div>
+	</div>
+	<!-- Main Content -->
+	{ children... }
+}
+
+// DemoNotice shows a subtle demo notice within a page
+templ DemoNotice() {
+	<div class="rounded-lg bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 p-4 mb-6">
+		<div class="flex">
+			<div class="flex-shrink-0">
+				@icon.Info(icon.Props{Size: 20, Class: "text-yellow-600 dark:text-yellow-400"})
+			</div>
+			<div class="ml-3">
+				<h3 class="text-sm font-medium text-yellow-800 dark:text-yellow-200">Demo Mode</h3>
+				<div class="mt-1 text-sm text-yellow-700 dark:text-yellow-300">
+					<p>This page is part of the Social Ops demo application. All data shown is sample data for demonstration purposes.</p>
+				</div>
+			</div>
+		</div>
+	</div>
+}

@@ -1,0 +1,406 @@
+package navbar
+
+import (
+	"github.com/Lakeshore-Labs/templecho/components/avatar"
+	"github.com/Lakeshore-Labs/templecho/components/badge"
+	"github.com/Lakeshore-Labs/templecho/components/button"
+	"github.com/Lakeshore-Labs/templecho/components/drawer"
+	"github.com/Lakeshore-Labs/templecho/components/dropdown"
+	"github.com/Lakeshore-Labs/templecho/components/icon"
+	"github.com/Lakeshore-Labs/templecho/components/separator"
+	"github.com/Lakeshore-Labs/templecho/middleware"
+)
+
+templ Navbar005(config NavbarConfig) {
+	@Navbar005Desktop(config)
+}
+
+templ Navbar005MobileDrawer(config NavbarConfig) {
+	@drawer.Content(drawer.ContentProps{
+		ID:       "navbar-005-drawer",
+		Position: drawer.PositionLeft,
+		Class:    "w-72",
+	}) {
+		@Navbar005DrawerContent(config)
+	}
+}
+
+templ Navbar005DrawerContent(config NavbarConfig) {
+	<div class="flex flex-col h-full -m-6">
+		<div class="p-4 border-b bg-background">
+			<div class="flex items-center justify-between mb-4">
+				@Navbar005Logo(config.Brand)
+				@drawer.Close() {
+					@icon.X(icon.Props{Size: 20})
+				}
+			</div>
+			if config.User != nil {
+				@Navbar005UserProfile(config.User)
+			}
+		</div>
+		<nav class="flex-1 p-4 overflow-y-auto bg-background">
+			<div class="space-y-1">
+				<div class="mb-4">
+					<div class="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Navigation</div>
+					@Navbar005MobileMenuItems(config.MenuItems)
+				</div>
+				if config.User != nil {
+					@separator.Separator(separator.Props{Class: "my-4"})
+					<div>
+						<div class="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Account</div>
+						@Navbar005MobileUserItems(config.UserMenuItems)
+					</div>
+				}
+			</div>
+		</nav>
+		@Navbar005DrawerFooter(config)
+	</div>
+}
+
+templ Navbar005Desktop(config NavbarConfig) {
+	<nav class="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
+		<div class="container mx-auto px-4">
+			<div class="flex h-16 items-center justify-between">
+				<div class="flex items-center space-x-8">
+					@Navbar005Logo(config.Brand)
+					<div class="hidden lg:flex items-center space-x-6 text-muted-foreground">
+						@Navbar005MenuItems(config.MenuItems)
+					</div>
+				</div>
+				@Navbar005DesktopUserSection(config)
+				<div class="lg:hidden">
+					if config.User != nil {
+						// User is signed in - show hamburger menu
+						@drawer.Trigger(drawer.TriggerProps{
+							For: "mobile-nav-drawer",
+						}) {
+							@button.Button(button.Props{
+								Variant: button.VariantGhost,
+								Size:    button.SizeIcon,
+							}) {
+								@icon.Menu(icon.Props{Size: 20})
+							}
+						}
+					} else if config.ShowSignIn {
+						// User is not signed in - show sign-in button
+						<a href={ templ.URL(config.SignInPath) }>
+							@button.Button(button.Props{
+								Variant: button.VariantDefault,
+								Size:    button.SizeSm,
+							}) {
+								@icon.LogIn(icon.Props{Size: 16, Class: "mr-1"})
+								Sign In
+							}
+						</a>
+					}
+				</div>
+			</div>
+		</div>
+	</nav>
+}
+
+templ Navbar005Logo(brand BrandConfig) {
+	<div class="flex items-center space-x-3">
+		if brand.LogoIcon != nil {
+			@brand.LogoIcon
+		} else {
+			@icon.Layers()
+			// Default icon
+		}
+		<div>
+			<div class="text-lg font-bold">{ brand.Name }</div>
+			if brand.Subtitle != "" {
+				<div class="text-xs text-muted-foreground font-medium">{ brand.Subtitle }</div>
+			}
+		</div>
+	</div>
+}
+
+templ Navbar005UserProfile(user *UserConfig) {
+	<div class="flex items-center space-x-3">
+		@avatar.Avatar(avatar.Props{
+			Class: "h-12 w-12",
+		}) {
+			// Try to get embedded avatar from context first
+			if avatarDataURI := middleware.GetAvatarDataURI(ctx); avatarDataURI != "" {
+				// Embedded data URI - no fallback needed
+				@avatar.Image(avatar.ImageProps{
+					Src: avatarDataURI,
+					Alt: "User Avatar",
+				})
+			} else {
+				// No avatar available, show initials
+				@avatar.Fallback() {
+					{ avatar.Initials(user.Name) }
+				}
+			}
+		}
+		<div class="flex-1 min-w-0">
+			<div class="font-medium text-primary/80">{ user.Name }</div>
+			<div class="text-sm truncate text-muted-foreground">{ user.Email }</div>
+			if len(user.Badges) > 0 {
+				<div class="flex items-center space-x-2 mt-1">
+					for _, userBadge := range user.Badges {
+						@badge.Badge(badge.Props{
+							Variant: badge.Variant(userBadge.Variant),
+							Class:   "text-xs " + userBadge.Class,
+						}) {
+							{ userBadge.Text }
+						}
+					}
+				</div>
+			}
+		</div>
+	</div>
+}
+
+templ Navbar005DesktopUserSection(config NavbarConfig) {
+	<div class="flex items-center space-x-4 text-muted-foreground">
+		<div class="hidden lg:flex items-center space-x-4">
+			if config.ShowSearch {
+				@button.Button(button.Props{
+					Variant: button.VariantGhost,
+					Size:    button.SizeIcon,
+				}) {
+					@icon.Search(icon.Props{Size: 18})
+				}
+			}
+			if config.ShowNotifications {
+				@button.Button(button.Props{
+					Variant: button.VariantGhost,
+					Size:    button.SizeIcon,
+					Class:   "relative",
+				}) {
+					@icon.Bell(icon.Props{Size: 18})
+					if config.NotificationCount > 0 {
+						<span class="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full border-2 border-background"></span>
+					}
+				}
+			}
+			if config.ShowMessages {
+				@button.Button(button.Props{
+					Variant: button.VariantGhost,
+					Size:    button.SizeIcon,
+				}) {
+					@icon.MessageSquare(icon.Props{Size: 18})
+				}
+			}
+			// Dark mode toggle button
+			@button.Button(button.Props{
+				Variant: button.VariantGhost,
+				Size:    button.SizeIcon,
+				Attributes: templ.Attributes{
+					"data-theme-switcher": "true",
+				},
+			}) {
+				<span id="theme-toggle-icon">
+					@icon.Sun(icon.Props{Size: 20})
+				</span>
+			}
+		</div>
+		if config.User != nil {
+			<div class="hidden lg:block">
+				@separator.Separator(separator.Props{
+					Orientation: "vertical",
+					Class:       "h-6",
+				})
+			</div>
+			<div class="hidden lg:block">
+				@Navbar005UserDropdown(config.User, config.UserMenuItems)
+			</div>
+		} else if config.ShowSignIn {
+			<a href={ templ.URL(config.SignInPath) } class="hidden lg:block">
+				@button.Button(button.Props{
+					Variant: button.VariantDefault,
+					Size:    button.SizeDefault,
+				}) {
+					@icon.LogIn(icon.Props{Size: 16, Class: "mr-2"})
+					Sign In
+				}
+			</a>
+		}
+	</div>
+}
+
+templ Navbar005UserDropdown(user *UserConfig, menuItems []UserMenuItem) {
+	@dropdown.Dropdown(dropdown.Props{
+		ID: "user-menu",
+	}) {
+		@dropdown.Trigger() {
+			@button.Button(button.Props{
+				Variant: button.VariantGhost,
+				Class:   "flex items-center justify-center",
+			}) {
+				@avatar.Avatar(avatar.Props{
+					Class: "h-8 w-8 border-2 border-border",
+				}) {
+					// Try to get embedded avatar from context first
+					if avatarDataURI := middleware.GetAvatarDataURI(ctx); avatarDataURI != "" {
+						// Embedded data URI - no fallback needed
+						@avatar.Image(avatar.ImageProps{
+							Src: avatarDataURI,
+							Alt: "User Avatar",
+						})
+					} else {
+						// No avatar available, show initials
+						@avatar.Fallback() {
+							{ avatar.Initials(user.Name) }
+						}
+					}
+				}
+				@icon.ChevronDown(icon.Props{Size: 16, Class: "text-muted-foreground"})
+			}
+		}
+		@dropdown.Content(dropdown.ContentProps{
+			Class: "w-72",
+		}) {
+			<div class="px-4 py-3 border-b">
+				@Navbar005UserProfile(user)
+			</div>
+			<div class="py-1">
+				for _, item := range menuItems {
+					if item.Separator {
+						@separator.Separator()
+					}
+					@dropdown.Item(dropdown.ItemProps{
+						Class: "p-0 " + item.Class,
+					}) {
+						<a href={ templ.URL(item.Path) } class="flex items-center space-x-3 text-muted-foreground px-4 py-2 w-full">
+							if item.Icon != nil {
+								@item.Icon
+							}
+							<span class="text-sm">{ item.Name }</span>
+						</a>
+					}
+				}
+			</div>
+		}
+	}
+}
+
+templ Navbar005DrawerFooter(config NavbarConfig) {
+	<div class="p-4 border-t bg-background">
+		if config.User != nil {
+			<div class="flex items-center justify-between mb-3">
+				if config.ShowSearch {
+					@button.Button(button.Props{
+						Variant: button.VariantOutline,
+						Size:    button.SizeIcon,
+					}) {
+						@icon.Search(icon.Props{Size: 18})
+					}
+				}
+				if config.ShowNotifications {
+					@button.Button(button.Props{
+						Variant: button.VariantOutline,
+						Size:    button.SizeIcon,
+						Class:   "relative",
+					}) {
+						@icon.Bell(icon.Props{Size: 18})
+						if config.NotificationCount > 0 {
+							<span class="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full border-2 border-background"></span>
+						}
+					}
+				}
+				if config.ShowMessages {
+					@button.Button(button.Props{
+						Variant: button.VariantOutline,
+						Size:    button.SizeIcon,
+					}) {
+						@icon.MessageSquare(icon.Props{Size: 18})
+					}
+				}
+			</div>
+			for _, item := range config.UserMenuItems {
+				if item.Name == "Sign Out" {
+					<a href={ templ.URL(item.Path) } class="block">
+						@button.Button(button.Props{
+							Variant: button.VariantOutline,
+							Class:   "w-full justify-start text-destructive hover:bg-destructive/10",
+						}) {
+							if item.Icon != nil {
+								@item.Icon
+							}
+							{ item.Name }
+						}
+					</a>
+					break
+				}
+			}
+		}
+	</div>
+}
+
+func hxAttributes(item MenuItem) templ.Attributes {
+	return templ.Attributes{
+		"hx-target":   "main",
+		"hx-swap":     "innerHTML",
+		"hx-get":      item.Path,
+		"hx-push-url": "true",
+	}
+}
+
+const useHTMX = false
+
+templ Navbar005MenuItems(items []MenuItem) {
+	for _, item := range items {
+		<a
+			href={ templ.URL(item.Path) }
+			if useHTMX {
+				{ hxAttributes(item) ... }
+			}
+		>
+			if item.IsActive {
+				@button.Button(button.Props{
+					Variant: button.VariantGhost,
+					Class:   "flex items-center gap-2 bg-accent text-accent-foreground",
+				}) {
+					if item.Icon != nil {
+						@item.Icon
+					}
+					<span>{ item.Name }</span>
+				}
+			} else {
+				@button.Button(button.Props{
+					Variant: button.VariantGhost,
+					Class:   "flex items-center gap-2",
+				}) {
+					if item.Icon != nil {
+						@item.Icon
+					}
+					<span>{ item.Name }</span>
+				}
+			}
+		</a>
+	}
+}
+
+templ Navbar005MobileMenuItems(items []MenuItem) {
+	for _, item := range items {
+		<a
+			href={ templ.URL(item.Path) }
+			class="flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-accent hover:text-accent-foreground"
+			if useHTMX {
+				{ hxAttributes(item) ... }
+			}
+		>
+			if item.Icon != nil {
+				@item.Icon
+			}
+			<span class="font-medium">{ item.Name }</span>
+		</a>
+	}
+}
+
+templ Navbar005MobileUserItems(items []UserMenuItem) {
+	for _, item := range items {
+		if !item.Separator && item.Name != "Sign Out" {
+			<a href={ templ.URL(item.Path) } class="flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-accent hover:text-accent-foreground">
+				if item.Icon != nil {
+					@item.Icon
+				}
+				<span>{ item.Name }</span>
+			</a>
+		}
+	}
+}

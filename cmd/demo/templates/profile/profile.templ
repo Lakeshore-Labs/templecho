@@ -1,0 +1,353 @@
+package profile
+
+import (
+	"github.com/Lakeshore-Labs/templecho/components/avatar"
+	"github.com/Lakeshore-Labs/templecho/components/button"
+	"github.com/Lakeshore-Labs/templecho/components/form"
+	"github.com/Lakeshore-Labs/templecho/components/icon"
+	"github.com/Lakeshore-Labs/templecho/components/input"
+	"github.com/Lakeshore-Labs/templecho/components/label"
+	"github.com/Lakeshore-Labs/templecho/components/selectbox"
+	"github.com/Lakeshore-Labs/templecho/components/textarea"
+)
+
+templ ProfileEdit001() {
+	<div class="container mx-auto px-4 py-8">
+		<div class="max-w-2xl mx-auto">
+			@ProfileEdit001_Header()
+			@ProfileEdit001_Form()
+		</div>
+	</div>
+}
+
+templ ProfileEdit001_Header() {
+	<div class="mb-8">
+		<h2 class="text-3xl font-bold mb-2">Edit Profile</h2>
+		<p class="text-muted-foreground">Update your personal information and manage your public profile</p>
+	</div>
+}
+
+templ ProfileEdit001_Form() {
+	<form class="bg-card p-4 sm:p-6 lg:p-8 rounded-lg border space-y-6">
+		@ProfileEdit001_AvatarSection()
+		@ProfileEdit001_PersonalSection()
+		@ProfileEdit001_ContactSection()
+		@ProfileEdit001_SocialSection()
+		@ProfileEdit001_BioSection()
+		@ProfileEdit001_Actions()
+	</form>
+}
+
+templ ProfileEdit001_AvatarSection() {
+	<div class="space-y-4">
+		<h3 class="text-lg font-semibold">Profile Picture</h3>
+		<div class="flex flex-col sm:flex-row items-center gap-4">
+			@avatar.Avatar(avatar.Props{Size: avatar.SizeLg}) {
+				@avatar.Image(avatar.ImageProps{
+					Src: "/assets/img/avatar-gh-5.png",
+					Alt: "Profile picture",
+				})
+				@avatar.Fallback() {
+					JD
+				}
+			}
+			<div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+				@button.Button(button.Props{
+					Type:    "button",
+					Variant: button.VariantOutline,
+					Class:   "w-full sm:w-auto",
+				}) {
+					@icon.Upload(icon.Props{Size: 16})
+					<span class="ml-2">Upload New</span>
+				}
+				@button.Button(button.Props{
+					Type:    "button",
+					Variant: button.VariantGhost,
+					Class:   "w-full sm:w-auto",
+				}) {
+					Remove
+				}
+			</div>
+		</div>
+	</div>
+}
+
+templ ProfileEdit001_PersonalSection() {
+	<div class="space-y-4">
+		<h3 class="text-lg font-semibold">Personal Information</h3>
+		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+			@form.Item() {
+				@label.Label(label.Props{For: "account001-firstname"}) {
+					First Name
+				}
+				<div class="relative">
+					<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+						@icon.User(icon.Props{Size: 16, Class: "text-muted-foreground"})
+					</div>
+					@input.Input(input.Props{
+						ID:          "account001-firstname",
+						Placeholder: "John",
+						Value:       "John",
+						Class:       "pl-10",
+					})
+				</div>
+			}
+			@form.Item() {
+				@label.Label(label.Props{For: "account001-lastname"}) {
+					Last Name
+				}
+				<div class="relative">
+					<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+						@icon.User(icon.Props{Size: 16, Class: "text-muted-foreground"})
+					</div>
+					@input.Input(input.Props{
+						ID:          "account001-lastname",
+						Placeholder: "Doe",
+						Value:       "Doe",
+						Class:       "pl-10",
+					})
+				</div>
+			}
+		</div>
+		@form.Item() {
+			@label.Label(label.Props{For: "account001-username"}) {
+				Username
+			}
+			<div class="relative">
+				<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+					@icon.AtSign(icon.Props{Size: 16, Class: "text-muted-foreground"})
+				</div>
+				@input.Input(input.Props{
+					ID:          "account001-username",
+					Placeholder: "johndoe",
+					Value:       "johndoe",
+					Class:       "pl-10",
+				})
+			</div>
+			<p class="text-sm text-muted-foreground mt-1">This is your public display name</p>
+		}
+		@form.Item() {
+			@label.Label(label.Props{For: "account001-company"}) {
+				Company
+			}
+			<div class="relative">
+				<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+					@icon.Building(icon.Props{Size: 16, Class: "text-muted-foreground"})
+				</div>
+				@input.Input(input.Props{
+					ID:          "account001-company",
+					Placeholder: "Acme Inc.",
+					Value:       "Acme Inc.",
+					Class:       "pl-10",
+				})
+			</div>
+		}
+		@form.Item() {
+			@label.Label(label.Props{For: "account001-location"}) {
+				Location
+			}
+			<div class="relative">
+				<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+					@icon.MapPin(icon.Props{Size: 16, Class: "text-muted-foreground"})
+				</div>
+				@selectbox.SelectBox(selectbox.Props{Class: "pl-10"}) {
+					@selectbox.Trigger(selectbox.TriggerProps{
+						ID: "account001-location",
+					}) {
+						@selectbox.Value(selectbox.ValueProps{
+							Placeholder: "Select location",
+						})
+					}
+					@selectbox.Content() {
+						@selectbox.Item(selectbox.ItemProps{Value: "ny"}) {
+							New York, NY
+						}
+						@selectbox.Item(selectbox.ItemProps{Value: "sf"}) {
+							San Francisco, CA
+						}
+						@selectbox.Item(selectbox.ItemProps{Value: "la"}) {
+							Los Angeles, CA
+						}
+						@selectbox.Item(selectbox.ItemProps{Value: "chi"}) {
+							Chicago, IL
+						}
+						@selectbox.Item(selectbox.ItemProps{Value: "aus"}) {
+							Austin, TX
+						}
+					}
+				}
+			</div>
+		}
+	</div>
+}
+
+templ ProfileEdit001_ContactSection() {
+	<div class="space-y-4">
+		<h3 class="text-lg font-semibold">Contact Details</h3>
+		@form.Item() {
+			@label.Label(label.Props{For: "account001-email"}) {
+				Email Address
+			}
+			<div class="relative">
+				<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+					@icon.Mail(icon.Props{Size: 16, Class: "text-muted-foreground"})
+				</div>
+				@input.Input(input.Props{
+					ID:          "account001-email",
+					Type:        input.TypeEmail,
+					Placeholder: "john@example.com",
+					Value:       "john@example.com",
+					Class:       "pl-10",
+				})
+			</div>
+			<p class="text-sm text-muted-foreground mt-1">We'll never share your email with anyone else</p>
+		}
+		@form.Item() {
+			@label.Label(label.Props{For: "account001-phone"}) {
+				Phone Number
+			}
+			<div class="relative">
+				<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+					@icon.Phone(icon.Props{Size: 16, Class: "text-muted-foreground"})
+				</div>
+				@input.Input(input.Props{
+					ID:          "account001-phone",
+					Type:        input.TypeTel,
+					Placeholder: "+1 (555) 000-0000",
+					Value:       "+1 (555) 123-4567",
+					Class:       "pl-10",
+				})
+			</div>
+		}
+		@form.Item() {
+			@label.Label(label.Props{For: "account001-website"}) {
+				Website
+			}
+			<div class="relative">
+				<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+					@icon.Globe(icon.Props{Size: 16, Class: "text-muted-foreground"})
+				</div>
+				@input.Input(input.Props{
+					ID:          "account001-website",
+					Placeholder: "https://example.com",
+					Value:       "https://johndoe.com",
+					Class:       "pl-10",
+				})
+			</div>
+		}
+	</div>
+}
+
+templ ProfileEdit001_SocialSection() {
+	<div class="space-y-4">
+		<h3 class="text-lg font-semibold">Social Profiles</h3>
+		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+			@form.Item() {
+				@label.Label(label.Props{For: "account001-github"}) {
+					GitHub
+				}
+				<div class="relative">
+					<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+						@icon.Github(icon.Props{Size: 16, Class: "text-muted-foreground"})
+					</div>
+					@input.Input(input.Props{
+						ID:          "account001-github",
+						Placeholder: "username",
+						Value:       "johndoe",
+						Class:       "pl-10",
+					})
+				</div>
+			}
+			@form.Item() {
+				@label.Label(label.Props{For: "account001-twitter"}) {
+					Twitter
+				}
+				<div class="relative">
+					<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+						@icon.Twitter(icon.Props{Size: 16, Class: "text-muted-foreground"})
+					</div>
+					@input.Input(input.Props{
+						ID:          "account001-twitter",
+						Placeholder: "@username",
+						Value:       "@johndoe",
+						Class:       "pl-10",
+					})
+				</div>
+			}
+			@form.Item() {
+				@label.Label(label.Props{For: "account001-linkedin"}) {
+					LinkedIn
+				}
+				<div class="relative">
+					<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+						@icon.Linkedin(icon.Props{Size: 16, Class: "text-muted-foreground"})
+					</div>
+					@input.Input(input.Props{
+						ID:          "account001-linkedin",
+						Placeholder: "profile-url",
+						Value:       "linkedin.com/in/johndoe",
+						Class:       "pl-10",
+					})
+				</div>
+			}
+			@form.Item() {
+				@label.Label(label.Props{For: "account001-instagram"}) {
+					Instagram
+				}
+				<div class="relative">
+					<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+						@icon.Instagram(icon.Props{Size: 16, Class: "text-muted-foreground"})
+					</div>
+					@input.Input(input.Props{
+						ID:          "account001-instagram",
+						Placeholder: "@username",
+						Value:       "@johndoe",
+						Class:       "pl-10",
+					})
+				</div>
+			}
+		</div>
+	</div>
+}
+
+templ ProfileEdit001_BioSection() {
+	<div class="space-y-4">
+		@form.Item() {
+			@label.Label(label.Props{For: "account001-bio"}) {
+				Bio
+			}
+			<div class="relative">
+				<div class="absolute top-3 left-0 pl-3 pointer-events-none">
+					@icon.FileText(icon.Props{Size: 16, Class: "text-muted-foreground"})
+				</div>
+				@textarea.Textarea(textarea.Props{
+					ID:          "account001-bio",
+					Placeholder: "Tell us about yourself...",
+					Value:       "Full-stack developer passionate about building great user experiences.",
+					Rows:        4,
+					Class:       "pl-10",
+				})
+			</div>
+			<p class="text-sm text-muted-foreground">Brief description for your profile. URLs are hyperlinked.</p>
+		}
+	</div>
+}
+
+templ ProfileEdit001_Actions() {
+	<div class="flex flex-col sm:flex-row gap-3 pt-4">
+		@button.Button(button.Props{
+			Type:    "button",
+			Variant: button.VariantOutline,
+			Class:   "w-full sm:w-auto sm:flex-1",
+		}) {
+			@icon.X(icon.Props{Size: 16})
+			<span class="ml-2">Cancel</span>
+		}
+		@button.Button(button.Props{
+			Class: "w-full sm:w-auto sm:flex-1",
+		}) {
+			@icon.Save(icon.Props{Size: 16})
+			<span class="ml-2">Save Changes</span>
+		}
+	</div>
+}

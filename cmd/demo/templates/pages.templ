@@ -1,0 +1,99 @@
+package templates
+
+import (
+	"github.com/Lakeshore-Labs/templecho/examples/demo/templates/calendar"
+	ai "github.com/Lakeshore-Labs/templecho/examples/demo/templates/chat"
+	"github.com/Lakeshore-Labs/templecho/examples/demo/templates/gallery"
+	integrations "github.com/Lakeshore-Labs/templecho/examples/demo/templates/integrations"
+	"github.com/Lakeshore-Labs/templecho/examples/demo/templates/product"
+	"github.com/Lakeshore-Labs/templecho/examples/demo/templates/profile"
+	"github.com/Lakeshore-Labs/templecho/blocks/layout"
+)
+
+templ ProductPage() {
+	@layout.Layout("Product") {
+		@DemoLayout() {
+			@product.Product002()
+		}
+	}
+}
+
+templ ProductDetailPage() {
+	@layout.Layout("Product Detail") {
+		@DemoLayout() {
+			@product.Product003()
+		}
+	}
+}
+
+templ PromptPage() {
+	@layout.Layout("AI Prompt") {
+		@DemoLayout() {
+			@ai.AI004()
+		}
+	}
+}
+
+templ CalendarPage() {
+	@layout.Layout("Calendar") {
+		@DemoLayout() {
+			@calendar.Calendar003()
+		}
+	}
+}
+
+templ MarketingSplitPage() {
+	@layout.Layout("Marketing Split") {
+		@DemoLayout() {
+			@SignUp002()
+		}
+	}
+}
+
+templ LoginPage() {
+	@layout.Layout("Login") {
+		@DemoLayout() {
+			@Login001()
+		}
+	}
+}
+
+templ ShowcasePage() {
+	@layout.Layout("Portfolio Showcase") {
+		@DemoLayout() {
+			@gallery.Gallery006()
+		}
+	}
+}
+
+templ GridPage() {
+	@layout.Layout("Gallery Grid") {
+		@DemoLayout() {
+			@gallery.Gallery001()
+		}
+	}
+}
+
+templ ProfilePage() {
+	@layout.Layout("Profile") {
+		@DemoLayout() {
+			@profile.ProfileEdit001()
+		}
+	}
+}
+
+templ IntegrationsPage() {
+	@layout.Layout("Integrations") {
+		@DemoLayout() {
+			@integrations.Integrations001()
+		}
+	}
+}
+
+templ PromptWithMetadataPage() {
+	@layout.Layout("AI Prompt with Metadata") {
+		@DemoLayout() {
+			@ai.AI009()
+		}
+	}
+}

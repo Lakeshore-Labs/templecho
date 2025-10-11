@@ -1,0 +1,247 @@
+package product
+
+import (
+	"fmt"
+
+	accordion "github.com/Lakeshore-Labs/templecho/components/accordion"
+	badge "github.com/Lakeshore-Labs/templecho/components/badge"
+	button "github.com/Lakeshore-Labs/templecho/components/button"
+	carousel "github.com/Lakeshore-Labs/templecho/components/carousel"
+	icon "github.com/Lakeshore-Labs/templecho/components/icon"
+	rating "github.com/Lakeshore-Labs/templecho/components/rating"
+	selectbox "github.com/Lakeshore-Labs/templecho/components/selectbox"
+	separator "github.com/Lakeshore-Labs/templecho/components/separator"
+	tabs "github.com/Lakeshore-Labs/templecho/components/tabs"
+)
+
+// Product003 - Product Detail Page
+templ Product003() {
+	<div class="min-h-screen p-6 md:p-10">
+		<div class="max-w-7xl mx-auto">
+			<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+				@Product003_Gallery()
+				@Product003_Details()
+			</div>
+			@separator.Separator(separator.Props{Class: "my-12"})
+			@Product003_TabSection()
+		</div>
+	</div>
+}
+
+templ Product003_Gallery() {
+	<div class="space-y-4">
+		@carousel.Carousel(carousel.Props{
+			ID: "product-gallery",
+		}) {
+			@carousel.Content() {
+				@carousel.Item() {
+					<img src="/assets/img/placeholder.svg" alt="Product 1" class="w-full aspect-square object-cover rounded-lg"/>
+				}
+				@carousel.Item() {
+					<img src="/assets/img/placeholder.svg" alt="Product 2" class="w-full aspect-square object-cover rounded-lg"/>
+				}
+				@carousel.Item() {
+					<img src="/assets/img/placeholder.svg" alt="Product 3" class="w-full aspect-square object-cover rounded-lg"/>
+				}
+			}
+			@carousel.Previous()
+			@carousel.Next()
+		}
+	</div>
+}
+
+templ Product003_Details() {
+	<div class="space-y-6">
+		@Product003_Header()
+		@Product003_Price()
+		@separator.Separator()
+		@Product003_Options()
+		@Product003_Actions()
+		@separator.Separator()
+		@Product003_Features()
+	</div>
+}
+
+templ Product003_Header() {
+	<div>
+		<div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+			<h1 class="text-2xl sm:text-3xl font-bold">Premium Smart Watch</h1>
+			@badge.Badge(badge.Props{
+				Variant: badge.VariantSecondary,
+				Class:   "w-fit",
+			}) {
+				In Stock
+			}
+		</div>
+		<div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2">
+			<div class="flex items-center">
+				@rating.Rating(rating.Props{
+					Value:    4.5,
+					ReadOnly: true,
+					Class:    "flex-row items-center",
+				}) {
+					@rating.Group() {
+						for i := 1; i <= 5; i++ {
+							@rating.Item(rating.ItemProps{
+								Value: i,
+								Style: rating.StyleStar,
+							})
+						}
+					}
+				}
+			</div>
+			<span class="text-sm text-muted-foreground">(127 reviews)</span>
+		</div>
+	</div>
+}
+
+templ Product003_Price() {
+	<div>
+		<div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+			<span class="text-2xl sm:text-3xl font-bold">$299</span>
+			<span class="text-lg sm:text-xl text-muted-foreground line-through">$399</span>
+			@badge.Badge(badge.Props{
+				Variant: badge.VariantSecondary,
+			}) {
+				25% OFF
+			}
+		</div>
+		<p class="text-sm text-muted-foreground mt-1">Free shipping on orders over $50</p>
+	</div>
+}
+
+templ Product003_Options() {
+	<div class="space-y-4">
+		<div>
+			<label class="text-sm font-medium mb-2 block">Color</label>
+			<div class="flex gap-2">
+				@Product003_ColorOption("bg-gray-900", true)
+				@Product003_ColorOption("bg-gray-500", false)
+				@Product003_ColorOption("bg-blue-600", false)
+			</div>
+		</div>
+		<div>
+			<label class="text-sm font-medium mb-2 block">Size</label>
+			@selectbox.SelectBox() {
+				@selectbox.Trigger(selectbox.TriggerProps{
+					Class: "w-full",
+				}) {
+					@selectbox.Value(selectbox.ValueProps{
+						Placeholder: "Select size",
+					})
+				}
+				@selectbox.Content() {
+					@selectbox.Item(selectbox.ItemProps{Value: "40mm"}) {
+						40mm
+					}
+					@selectbox.Item(selectbox.ItemProps{Value: "44mm"}) {
+						44mm
+					}
+				}
+			}
+		</div>
+	</div>
+}
+
+templ Product003_ColorOption(color string, selected bool) {
+	<button
+		class={ fmt.Sprintf("w-10 h-10 rounded-full %s ring-2 ring-offset-2 transition-all", color),
+			templ.KV("ring-primary", selected),
+			templ.KV("ring-transparent hover:ring-gray-300", !selected) }
+		aria-label="Select color"
+	></button>
+}
+
+templ Product003_Actions() {
+	<div class="space-y-3">
+		<div class="flex flex-col sm:flex-row gap-3">
+			@button.Button(button.Props{
+				Class: "flex-1",
+			}) {
+				@icon.ShoppingCart(icon.Props{Size: 18, Class: "mr-2"})
+				Add to Cart
+			}
+			@button.Button(button.Props{
+				Variant: button.VariantOutline,
+			}) {
+				@icon.Heart(icon.Props{Size: 18})
+			}
+		</div>
+		@button.Button(button.Props{
+			Variant: button.VariantSecondary,
+			Class:   "w-full",
+		}) {
+			Buy Now
+		}
+	</div>
+}
+
+templ Product003_Features() {
+	<div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 sm:gap-4 text-sm">
+		@Product003_Feature(icon.Truck, "Free Shipping")
+		@Product003_Feature(icon.RefreshCw, "30-Day Returns")
+		@Product003_Feature(icon.Shield, "2-Year Warranty")
+		@Product003_Feature(icon.CreditCard, "Secure Payment")
+	</div>
+}
+
+templ Product003_Feature(iconFunc func(...icon.Props) templ.Component, text string) {
+	<div class="flex items-center gap-2 text-muted-foreground">
+		@iconFunc(icon.Props{Size: 16})
+		<span>{ text }</span>
+	</div>
+}
+
+templ Product003_TabSection() {
+	@tabs.Tabs() {
+		@tabs.List(tabs.ListProps{
+			Class: "mb-3",
+		}) {
+			@tabs.Trigger(tabs.TriggerProps{Value: "specifications"}) {
+				Specifications
+			}
+			@tabs.Trigger(tabs.TriggerProps{Value: "reviews"}) {
+				Reviews
+			}
+		}
+		@tabs.Content(tabs.ContentProps{Value: "specifications"}) {
+			@accordion.Accordion() {
+				@accordion.Item() {
+					@accordion.Trigger() {
+						Dimensions & Weight
+					}
+					@accordion.Content() {
+						<div class="space-y-1 text-sm">
+							<p>Case Size: 44mm x 38mm x 10.7mm</p>
+							<p>Weight: 32g (without band)</p>
+							<p>Band Size: Fits 140-210mm wrists</p>
+						</div>
+					}
+				}
+				@accordion.Item() {
+					@accordion.Trigger() {
+						Display
+					}
+					@accordion.Content() {
+						<div class="space-y-1 text-sm">
+							<p>Type: AMOLED touchscreen</p>
+							<p>Resolution: 396 x 484 pixels</p>
+							<p>Always-on display</p>
+						</div>
+					}
+				}
+			}
+		}
+		@tabs.Content(tabs.ContentProps{Value: "reviews"}) {
+			<div class="text-center py-8 text-muted-foreground">
+				<p>No reviews yet. Be the first to review this product!</p>
+				@button.Button(button.Props{
+					Variant: button.VariantOutline,
+					Class:   "mt-4",
+				}) {
+					Write a Review
+				}
+			</div>
+		}
+	}
+}

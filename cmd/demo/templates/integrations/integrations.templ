@@ -1,0 +1,190 @@
+package account
+
+import (
+	"github.com/Lakeshore-Labs/templecho/components/badge"
+	"github.com/Lakeshore-Labs/templecho/components/button"
+	"github.com/Lakeshore-Labs/templecho/components/card"
+	"github.com/Lakeshore-Labs/templecho/components/icon"
+	"github.com/Lakeshore-Labs/templecho/components/toggle"
+)
+
+templ Integrations001() {
+	<div class="container mx-auto px-4 py-8">
+		<div class="max-w-6xl mx-auto">
+			@Integrations001_Header()
+			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+				@Integrations001_IntegrationCard(
+					"GitHub",
+					"Connect your GitHub repositories",
+					"Version Control",
+					icon.Github(icon.Props{Size: 24}),
+					true,
+					"Connected to 12 repositories",
+				)
+				@Integrations001_IntegrationCard(
+					"Slack",
+					"Get notifications in your Slack workspace",
+					"Communication",
+					icon.MessageSquare(icon.Props{Size: 24}),
+					true,
+					"Connected to workspace 'Acme Inc'",
+				)
+				@Integrations001_IntegrationCard(
+					"Google Drive",
+					"Sync files with Google Drive",
+					"Storage",
+					icon.HardDrive(icon.Props{Size: 24}),
+					false,
+					"",
+				)
+				@Integrations001_IntegrationCard(
+					"Stripe",
+					"Process payments with Stripe",
+					"Payments",
+					icon.CreditCard(icon.Props{Size: 24}),
+					true,
+					"Live mode enabled",
+				)
+				@Integrations001_IntegrationCard(
+					"Zapier",
+					"Automate workflows with 5000+ apps",
+					"Automation",
+					icon.Zap(icon.Props{Size: 24}),
+					false,
+					"",
+				)
+				@Integrations001_IntegrationCard(
+					"Discord",
+					"Join your community on Discord",
+					"Community",
+					icon.Users(icon.Props{Size: 24}),
+					false,
+					"",
+				)
+			</div>
+			@Integrations001_CustomIntegrations()
+		</div>
+	</div>
+}
+
+templ Integrations001_Header() {
+	<div class="mb-8">
+		<h2 class="text-3xl font-bold text-foreground mb-2">Integrations</h2>
+		<p class="text-muted-foreground">Connect your favorite tools and services</p>
+	</div>
+}
+
+templ Integrations001_IntegrationCard(name, description, category string, iconComponent templ.Component, isConnected bool, connectionInfo string) {
+	@card.Card(card.Props{Class: "h-full"}) {
+		@card.Content(card.ContentProps{Class: "p-6 h-full flex flex-col"}) {
+			<div class="flex items-start justify-between mb-4">
+				<div class="p-3 bg-muted rounded-lg">
+					@iconComponent
+				</div>
+				if isConnected {
+					@badge.Badge(badge.Props{Variant: badge.VariantSecondary}) {
+						Connected
+					}
+				}
+			</div>
+			<div class="flex-1">
+				<h3 class="font-semibold text-lg mb-1">{ name }</h3>
+				<p class="text-sm text-muted-foreground mb-2">{ description }</p>
+				<p class="text-xs text-muted-foreground mb-4">{ category }</p>
+				if isConnected && connectionInfo != "" {
+					<p class="text-sm text-muted-foreground mb-4">{ connectionInfo }</p>
+				}
+			</div>
+			<div class="flex gap-2 mt-auto pt-4">
+				if isConnected {
+					@button.Button(button.Props{
+						Variant: button.VariantOutline,
+						Class:   "flex-1",
+					}) {
+						Configure
+					}
+					@button.Button(button.Props{
+						Variant: button.VariantGhost,
+						Class:   "flex-1",
+					}) {
+						Disconnect
+					}
+				} else {
+					@button.Button(button.Props{
+						Class: "w-full",
+					}) {
+						Connect
+					}
+				}
+			</div>
+		}
+	}
+}
+
+templ Integrations001_CustomIntegrations() {
+	@card.Card(card.Props{Class: "mt-8"}) {
+		@card.Header() {
+			@card.Title() {
+				Custom Integrations
+			}
+			@card.Description() {
+				Build your own integrations using our API
+			}
+		}
+		@card.Content() {
+			<div class="space-y-4">
+				@Integrations001_CustomIntegrationItem(
+					"E-commerce Sync",
+					"Syncs orders from Shopify to internal system",
+					"Last run: 2 hours ago",
+					true,
+				)
+				@Integrations001_CustomIntegrationItem(
+					"Analytics Pipeline",
+					"Exports data to BigQuery for analysis",
+					"Last run: 1 day ago",
+					true,
+				)
+				@Integrations001_CustomIntegrationItem(
+					"Customer Support Bot",
+					"Automated responses for common queries",
+					"Disabled by user",
+					false,
+				)
+			</div>
+		}
+		@card.Footer() {
+			@button.Button() {
+				@icon.Plus(icon.Props{Size: 16})
+				<span class="ml-2">Create Custom Integration</span>
+			}
+		}
+	}
+}
+
+templ Integrations001_CustomIntegrationItem(name, description, status string, isActive bool) {
+	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border rounded-lg gap-4">
+		<div class="flex items-center gap-3 flex-1 min-w-0">
+			<div class="p-2 bg-muted rounded flex-shrink-0">
+				@icon.Code(icon.Props{Size: 20})
+			</div>
+			<div class="min-w-0">
+				<p class="font-medium truncate">{ name }</p>
+				<p class="text-sm text-muted-foreground">{ description }</p>
+				<p class="text-xs text-muted-foreground mt-1">{ status }</p>
+			</div>
+		</div>
+		<div class="flex items-center gap-3 flex-shrink-0">
+			@toggle.Toggle(toggle.Props{
+				ID:      "integration-" + name,
+				Checked: isActive,
+			})
+			@button.Button(button.Props{
+				Variant: button.VariantGhost,
+				Size:    button.SizeIcon,
+			}) {
+				@icon.Settings(icon.Props{Size: 16})
+			}
+		</div>
+	</div>
+}

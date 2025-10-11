@@ -1,0 +1,111 @@
+package product
+
+import (
+	badge "github.com/Lakeshore-Labs/templecho/components/badge"
+	button "github.com/Lakeshore-Labs/templecho/components/button"
+	card "github.com/Lakeshore-Labs/templecho/components/card"
+	icon "github.com/Lakeshore-Labs/templecho/components/icon"
+	rating "github.com/Lakeshore-Labs/templecho/components/rating"
+)
+
+// Product002 - Product Grid
+templ Product002() {
+	<div class="min-h-screen p-6 md:p-10">
+		<div class="max-w-7xl mx-auto">
+			@Product002_Header()
+			@Product002_Grid()
+		</div>
+	</div>
+}
+
+templ Product002_Header() {
+	<div class="mb-8">
+		<h2 class="text-3xl font-bold">Featured Products</h2>
+		<p class="text-muted-foreground mt-2">Discover our hand-picked selection</p>
+	</div>
+}
+
+templ Product002_Grid() {
+	<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+		@Product002_ProductCard("Wireless Headphones", "$199", "$249", 4.5, "/assets/img/placeholder.svg", true, "Sale")
+		@Product002_ProductCard("Smart Watch", "$399", "", 4.8, "/assets/img/placeholder.svg", false, "")
+		@Product002_ProductCard("Camera Lens", "$899", "$999", 4.6, "/assets/img/placeholder.svg", true, "-10%")
+		@Product002_ProductCard("Laptop Stand", "$59", "", 4.3, "/assets/img/placeholder.svg", false, "")
+	</div>
+}
+
+templ Product002_ProductCard(name string, price string, oldPrice string, ratingValue float64, imageUrl string, hasBadge bool, badgeText string) {
+	@card.Card(card.Props{
+		Class: "overflow-hidden hover:shadow-lg transition-all duration-200",
+	}) {
+		<div class="aspect-square relative overflow-hidden bg-muted">
+			<img
+				src={ imageUrl }
+				alt={ name }
+				class="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+			/>
+			if hasBadge {
+				<div class="absolute top-2 left-2">
+					@badge.Badge(badge.Props{
+						Variant: badge.VariantSecondary,
+					}) {
+						{ badgeText }
+					}
+				</div>
+			}
+		</div>
+		@card.Content() {
+			<div class="space-y-3">
+				@Product002_ProductInfo(name, price, oldPrice, ratingValue)
+				@Product002_Actions()
+			</div>
+		}
+	}
+}
+
+templ Product002_ProductInfo(name string, price string, oldPrice string, ratingValue float64) {
+	<div>
+		<h3 class="font-semibold line-clamp-1">{ name }</h3>
+		<div class="flex items-center gap-2 mt-1">
+			<div class="flex items-center">
+				@rating.Rating(rating.Props{
+					Value:    ratingValue,
+					ReadOnly: true,
+					Class:    "flex-row items-center",
+				}) {
+					@rating.Group() {
+						for i := 1; i <= 5; i++ {
+							@rating.Item(rating.ItemProps{
+								Value: i,
+								Style: rating.StyleStar,
+							})
+						}
+					}
+				}
+			</div>
+			<span class="text-xs text-muted-foreground">({ ratingValue })</span>
+		</div>
+		<div class="mt-2 flex items-baseline gap-2">
+			<span class="font-bold text-lg">{ price }</span>
+			if oldPrice != "" {
+				<span class="text-sm text-muted-foreground line-through">{ oldPrice }</span>
+			}
+		</div>
+	</div>
+}
+
+templ Product002_Actions() {
+	<div class="flex gap-2">
+		@button.Button(button.Props{
+			Class: "flex-1",
+		}) {
+			Add to Cart
+		}
+		@button.Button(button.Props{
+			Variant: button.VariantOutline,
+			Size:    button.SizeIcon,
+		}) {
+			@icon.Heart(icon.Props{Size: 14})
+		}
+	</div>
+}

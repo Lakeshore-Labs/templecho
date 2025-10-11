@@ -1,0 +1,330 @@
+package ai
+
+import (
+	badge "github.com/Lakeshore-Labs/templecho/components/badge"
+	button "github.com/Lakeshore-Labs/templecho/components/button"
+	card "github.com/Lakeshore-Labs/templecho/components/card"
+	dropdown "github.com/Lakeshore-Labs/templecho/components/dropdown"
+	form "github.com/Lakeshore-Labs/templecho/components/form"
+	icon "github.com/Lakeshore-Labs/templecho/components/icon"
+	input "github.com/Lakeshore-Labs/templecho/components/input"
+	popover "github.com/Lakeshore-Labs/templecho/components/popover"
+	textarea "github.com/Lakeshore-Labs/templecho/components/textarea"
+	toggle "github.com/Lakeshore-Labs/templecho/components/toggle"
+)
+
+templ AI004() {
+	<section class="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+		<div class="w-full max-w-4xl space-y-8">
+			@AI004_BasicPrompt()
+			@AI004_AdvancedPrompt()
+			@AI004_TemplatePrompt()
+		</div>
+	</section>
+}
+
+templ AI004_BasicPrompt() {
+	@card.Card() {
+		@card.Header() {
+			@card.Title() {
+				AI Prompt Input
+			}
+		}
+		@card.Content() {
+			<div class="space-y-4">
+				<div class="flex items-center gap-2 pb-2">
+					<span class="text-sm text-muted-foreground">Mode:</span>
+					<div class="flex gap-1">
+						@button.Button(button.Props{
+							Variant: button.VariantOutline,
+							Size:    button.SizeSm,
+							Class:   "h-7",
+						}) {
+							Chat
+						}
+						@button.Button(button.Props{
+							Variant: button.VariantGhost,
+							Size:    button.SizeSm,
+							Class:   "h-7",
+						}) {
+							Complete
+						}
+						@button.Button(button.Props{
+							Variant: button.VariantGhost,
+							Size:    button.SizeSm,
+							Class:   "h-7",
+						}) {
+							Edit
+						}
+					</div>
+				</div>
+				@textarea.Textarea(textarea.Props{
+					Placeholder: "Enter your prompt here...\n\nTip: Use @mentions for context, #tags for topics",
+					Class:       "min-h-[120px]",
+					Rows:        5,
+				})
+				<div class="flex flex-wrap items-center justify-between">
+					<div class="flex items-center gap-2">
+						@button.Button(button.Props{
+							Variant: button.VariantGhost,
+							Size:    button.SizeIcon,
+						}) {
+							@icon.Paperclip(icon.Props{
+								Size: 18,
+							})
+						}
+						@button.Button(button.Props{
+							Variant: button.VariantGhost,
+							Size:    button.SizeIcon,
+						}) {
+							@icon.Image(icon.Props{
+								Size: 18,
+							})
+						}
+						<div class="h-4 w-px bg-border mx-1"></div>
+						@popover.Trigger(popover.TriggerProps{
+							For: "chat-001-popover",
+						}) {
+							@button.Button(button.Props{
+								Variant: button.VariantGhost,
+								Size:    button.SizeSm,
+							}) {
+								@icon.Sparkles(icon.Props{
+									Size:  14,
+									Class: "mr-1",
+								})
+								Enhance
+							}
+						}
+						@popover.Content(popover.ContentProps{
+							ID:    "chat-001-popover",
+							Class: "w-64 p-3",
+						}) {
+							<div class="space-y-2">
+								<button class="w-full text-left p-2 hover:bg-muted rounded text-sm">Make more detailed</button>
+								<button class="w-full text-left p-2 hover:bg-muted rounded text-sm">Add examples</button>
+								<button class="w-full text-left p-2 hover:bg-muted rounded text-sm">Improve clarity</button>
+								<button class="w-full text-left p-2 hover:bg-muted rounded text-sm">Fix grammar</button>
+							</div>
+						}
+					</div>
+					<div class="flex items-center gap-3">
+						<span class="text-sm text-muted-foreground">0/4000</span>
+						@button.Button(button.Props{
+							Class: "flex-1 sm:flex-none",
+						}) {
+							Generate
+							@icon.Zap(icon.Props{
+								Size:  16,
+								Class: "ml-1",
+							})
+						}
+					</div>
+				</div>
+			</div>
+		}
+	}
+}
+
+templ AI004_AdvancedPrompt() {
+	@card.Card() {
+		@card.Header() {
+			@card.Title() {
+				Advanced Parameters
+			}
+		}
+		@card.Content() {
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+				<div class="space-y-4">
+					@textarea.Textarea(textarea.Props{
+						Placeholder: "System prompt (optional):\nYou are an expert programmer...",
+						Class:       "min-h-[100px] text-sm",
+						Rows:        4,
+					})
+					<div class="space-y-3">
+						@AI004_Parameter("Temperature", "0.7", "Controls randomness")
+						@AI004_Parameter("Max Tokens", "2048", "Maximum response length")
+						@AI004_Parameter("Top P", "1.0", "Nucleus sampling")
+						@AI004_Parameter("Frequency Penalty", "0.0", "Reduce repetition")
+					</div>
+				</div>
+				<div class="space-y-4">
+					@textarea.Textarea(textarea.Props{
+						Placeholder: "User prompt:\nWrite a function that...",
+						Class:       "min-h-[100px] text-sm",
+						Rows:        4,
+					})
+					<div class="space-y-3">
+						<div class="flex items-center justify-between">
+							<span class="text-sm">Stream Response</span>
+							@toggle.Toggle(toggle.Props{
+								Checked: true,
+							})
+						</div>
+						<div class="flex items-center justify-between">
+							<span class="text-sm">Include System Message</span>
+							@toggle.Toggle()
+						</div>
+						<div class="flex items-center justify-between">
+							<span class="text-sm">JSON Mode</span>
+							@toggle.Toggle()
+						</div>
+					</div>
+					<div class="pt-2">
+						@button.Button(button.Props{
+							Class: "w-full",
+						}) {
+							Run with Parameters
+						}
+					</div>
+				</div>
+			</div>
+		}
+	}
+}
+
+templ AI004_Parameter(label, value, description string) {
+	@form.Item() {
+		@form.Label() {
+			{ label }
+		}
+		@input.Input(input.Props{
+			Value: value,
+			Class: "w-20",
+		})
+		@form.Description(form.DescriptionProps{Class: "text-xs"}) {
+			{ description }
+		}
+	}
+}
+
+templ AI004_TemplatePrompt() {
+	@card.Card() {
+		@card.Header() {
+			@card.Title() {
+				Prompt Templates
+			}
+		}
+		@card.Content() {
+			<div class="space-y-4">
+				<div class="flex gap-2 flex-wrap">
+					@badge.Badge(badge.Props{
+						Variant: badge.VariantSecondary,
+						Class:   "cursor-pointer hover:bg-primary hover:text-primary-foreground",
+					}) {
+						Code Review
+					}
+					@badge.Badge(badge.Props{
+						Variant: badge.VariantSecondary,
+						Class:   "cursor-pointer hover:bg-primary hover:text-primary-foreground",
+					}) {
+						Explain Code
+					}
+					@badge.Badge(badge.Props{
+						Variant: badge.VariantSecondary,
+						Class:   "cursor-pointer hover:bg-primary hover:text-primary-foreground",
+					}) {
+						Write Tests
+					}
+					@badge.Badge(badge.Props{
+						Variant: badge.VariantSecondary,
+						Class:   "cursor-pointer hover:bg-primary hover:text-primary-foreground",
+					}) {
+						Optimize Performance
+					}
+					@badge.Badge(badge.Props{
+						Variant: badge.VariantSecondary,
+						Class:   "cursor-pointer hover:bg-primary hover:text-primary-foreground",
+					}) {
+						Debug Error
+					}
+					@badge.Badge(badge.Props{
+						Variant: badge.VariantSecondary,
+						Class:   "cursor-pointer hover:bg-primary hover:text-primary-foreground",
+					}) {
+						Refactor
+					}
+					@dropdown.Dropdown() {
+						@dropdown.Trigger() {
+							@badge.Badge(badge.Props{
+								Variant: badge.VariantOutline,
+								Class:   "cursor-pointer",
+							}) {
+								More
+								@icon.ChevronDown(icon.Props{
+									Size:  12,
+									Class: "ml-1",
+								})
+							}
+						}
+						@dropdown.Content(dropdown.ContentProps{
+							Class: "w-48",
+						}) {
+							@dropdown.Item() {
+								Documentation
+							}
+							@dropdown.Item() {
+								API Design
+							}
+							@dropdown.Item() {
+								Security Review
+							}
+							@dropdown.Item() {
+								Architecture
+							}
+						}
+					}
+				</div>
+				<div class="border rounded-lg bg-muted/50 p-4">
+					<div class="flex items-start justify-between mb-2">
+						<h4 class="text-sm font-medium">Code Review Template</h4>
+						@button.Button(button.Props{
+							Variant: button.VariantGhost,
+							Size:    button.SizeIcon,
+							Class:   "h-6 w-6",
+						}) {
+							@icon.X(icon.Props{
+								Size: 12,
+							})
+						}
+					</div>
+					<div class="space-y-3">
+						<div class="text-sm space-y-2">
+							<p class="text-muted-foreground">Review the following code for:</p>
+							<ul class="list-disc list-inside text-muted-foreground space-y-1 ml-2">
+								<li>Potential bugs or errors</li>
+								<li>Performance improvements</li>
+								<li>Code style and best practices</li>
+								<li>Security vulnerabilities</li>
+							</ul>
+						</div>
+						@textarea.Textarea(textarea.Props{
+							Placeholder: "Paste your code here...",
+							Class:       "min-h-[100px] font-mono text-sm",
+							Rows:        4,
+						})
+						<div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+							@button.Button(button.Props{
+								Variant: button.VariantOutline,
+								Size:    button.SizeSm,
+								Class:   "w-full sm:w-auto",
+							}) {
+								@icon.Save(icon.Props{
+									Size:  14,
+									Class: "mr-1",
+								})
+								Save Template
+							}
+							@button.Button(button.Props{
+								Size:  button.SizeSm,
+								Class: "w-full sm:w-auto",
+							}) {
+								Use This Prompt
+							}
+						</div>
+					</div>
+				</div>
+			</div>
+		}
+	}
+}

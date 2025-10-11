@@ -1,0 +1,427 @@
+// Layout001 - Fixed Sidebar + Header inside content area
+package layout
+
+import (
+	"github.com/Lakeshore-Labs/templecho/auth"
+	"github.com/Lakeshore-Labs/templecho/blocks/navbar"
+	"github.com/Lakeshore-Labs/templecho/components/avatar"
+	"github.com/Lakeshore-Labs/templecho/components/button"
+	"github.com/Lakeshore-Labs/templecho/components/calendar"
+	"github.com/Lakeshore-Labs/templecho/components/carousel"
+	"github.com/Lakeshore-Labs/templecho/components/chart"
+	"github.com/Lakeshore-Labs/templecho/components/code"
+	"github.com/Lakeshore-Labs/templecho/components/collapsible"
+	"github.com/Lakeshore-Labs/templecho/components/datepicker"
+	"github.com/Lakeshore-Labs/templecho/components/drawer"
+	"github.com/Lakeshore-Labs/templecho/components/dropdown"
+	"github.com/Lakeshore-Labs/templecho/components/icon"
+	"github.com/Lakeshore-Labs/templecho/components/input"
+	"github.com/Lakeshore-Labs/templecho/components/inputotp"
+	"github.com/Lakeshore-Labs/templecho/components/label"
+	"github.com/Lakeshore-Labs/templecho/components/modal"
+	"github.com/Lakeshore-Labs/templecho/components/popover"
+	"github.com/Lakeshore-Labs/templecho/components/progress"
+	"github.com/Lakeshore-Labs/templecho/components/rating"
+	"github.com/Lakeshore-Labs/templecho/components/selectbox"
+	"github.com/Lakeshore-Labs/templecho/components/separator"
+	"github.com/Lakeshore-Labs/templecho/components/sheet"
+	"github.com/Lakeshore-Labs/templecho/components/sidebar"
+	"github.com/Lakeshore-Labs/templecho/components/slider"
+	"github.com/Lakeshore-Labs/templecho/components/tabs"
+	"github.com/Lakeshore-Labs/templecho/components/tagsinput"
+	"github.com/Lakeshore-Labs/templecho/components/textarea"
+	"github.com/Lakeshore-Labs/templecho/components/timepicker"
+	"github.com/Lakeshore-Labs/templecho/components/toast"
+	"github.com/Lakeshore-Labs/templecho/middleware"
+)
+
+templ Layout001() {
+	{{ config := GetLayoutConfig(ctx) }}
+	{{ hasSidebar := len(config.SidebarRoutes) > 0 }}
+	<div class="min-h-screen bg-background">
+		<!-- Navbar -->
+		@navbar.Navbar005(config.NavbarConfig)
+		<div class="flex">
+			if hasSidebar {
+				<!-- Fixed Sidebar -->
+				<aside class="hidden lg:block w-64 bg-card min-h-[calc(100vh-4rem)]">
+					@Layout001Sidebar()
+				</aside>
+				<!-- Mobile Drawer (hidden by default, shown via JS) -->
+				<div id="mobile-drawer" class="fixed inset-0 z-40 hidden">
+					<div class="fixed inset-0 bg-black/50" onclick="toggleDrawer()"></div>
+					<div class="fixed left-0 top-0 h-full w-64 bg-card shadow-lg pt-16">
+						@Layout001Sidebar()
+					</div>
+				</div>
+			}
+			<!-- Main Content (full width if no sidebar) -->
+			<main class="flex-1 p-6">
+				{ children... }
+			</main>
+		</div>
+	</div>
+	if hasSidebar {
+		<script>
+			function toggleDrawer() {
+				const drawer = document.getElementById('mobile-drawer');
+				drawer.classList.toggle('hidden');
+			}
+		</script>
+	}
+}
+
+templ Layout001Sidebar() {
+	{{ config := GetLayoutConfig(ctx) }}
+	<div class="h-full flex flex-col">
+		<!-- Logo/Brand -->
+		<div class="p-4">
+			<div class="flex items-center space-x-3">
+				<div class="h-8 w-8 bg-primary/10 rounded-lg flex items-center justify-center">
+					<span class="text-primary font-bold">{ string(config.Brand.Name[0]) }</span>
+				</div>
+				<div class="text-lg font-semibold">{ config.Brand.Name }</div>
+			</div>
+		</div>
+		<!-- Navigation -->
+		<nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+			for _, item := range config.SidebarRoutes {
+				<a
+					href={ templ.URL(item.Path) }
+					class={ "flex items-center space-x-3 px-3 py-2 rounded-md transition-colors cursor-pointer", templ.KV("bg-primary/10 text-primary font-medium", item.IsActive), templ.KV("hover:bg-accent hover:text-accent-foreground text-foreground", !item.IsActive) }
+				>
+					if item.Icon != nil {
+						@item.Icon
+					}
+					<span>{ item.Name }</span>
+				</a>
+			}
+		</nav>
+		<!-- Footer -->
+		<div class="p-4">
+			<div class="px-3 py-2 text-center">
+				<span class="text-muted-foreground text-sm">© 2025 { config.Brand.Name }</span>
+			</div>
+		</div>
+	</div>
+}
+
+// Layout005 - Full Page Layout (No Navigation)
+// Clean layout for authentication pages, errors, and other full-page experiences
+templ Layout005() {
+	<div class="min-h-screen bg-background">
+		{ children... }
+	</div>
+}
+
+// Layout004 - Header Only (No Sidebar)
+// Clean layout with only top navigation, perfect for modern apps
+templ Layout004() {
+	{{ config := GetLayoutConfig(ctx) }}
+	{{ user := auth.GetUserFromContext(ctx) }}
+	<div class="min-h-screen bg-background">
+		<!-- Header with Navbar -->
+		@navbar.Navbar005(config.NavbarConfig)
+		<!-- Mobile Drawer (Right Side) -->
+		@drawer.Content(drawer.ContentProps{
+			ID:       "mobile-nav-drawer",
+			Position: drawer.PositionRight,
+			Class:    "w-80",
+		}) {
+			@Layout004MobileMenu(config, user)
+		}
+		<!-- Main Content - Full Width -->
+		<div class="container mx-auto px-4 py-8">
+			<main class="pb-20 lg:pb-0">
+				{ children... }
+			</main>
+		</div>
+	</div>
+}
+
+// Layout004MobileMenu - Mobile navigation menu for header-only layout
+templ Layout004MobileMenu(config *LayoutConfig, user *auth.User) {
+	<div class="flex flex-col h-full">
+		<!-- Header -->
+		<div class="p-4">
+			<div class="flex items-center justify-between">
+				<div class="flex items-center space-x-3">
+					if config.Brand.LogoIcon != nil {
+						@config.Brand.LogoIcon
+					} else {
+						@icon.Layers()
+					}
+					<div>
+						<div class="text-lg font-bold">{ config.Brand.Name }</div>
+						if config.Brand.Subtitle != "" {
+							<div class="text-xs text-muted-foreground font-medium">{ config.Brand.Subtitle }</div>
+						}
+					</div>
+				</div>
+				@drawer.Close() {
+					@icon.X(icon.Props{Size: 20})
+				}
+			</div>
+		</div>
+		<!-- Navigation Items -->
+		<nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+			<div class="mb-4">
+				<div class="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Navigation</div>
+				for _, item := range config.NavbarConfig.MenuItems {
+					if item.IsVisible == nil || item.IsVisible(ctx) {
+						<a
+							href={ templ.URL(item.Path) }
+							class="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+						>
+							if item.Icon != nil {
+								@item.Icon
+							}
+							<span>{ item.Name }</span>
+						</a>
+					}
+				}
+			</div>
+			// User menu items if authenticated
+			if user != nil && len(config.NavbarConfig.UserMenuItems) > 0 {
+				@separator.Separator(separator.Props{Class: "my-4"})
+				<div>
+					<div class="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Account</div>
+					for _, item := range config.NavbarConfig.UserMenuItems {
+						<a
+							href={ templ.URL(item.Path) }
+							class="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+						>
+							if item.Icon != nil {
+								@item.Icon
+							}
+							<span>{ item.Name }</span>
+						</a>
+					}
+				</div>
+			}
+		</nav>
+		<!-- Footer with User Profile or Auth Actions -->
+		<div class="p-4 space-y-3">
+			if user != nil {
+				<!-- User Profile with Dark Mode Toggle -->
+				<div class="flex items-center space-x-3 p-2">
+					@avatar.Avatar(avatar.Props{
+						Class: "h-10 w-10",
+					}) {
+						if avatarDataURI := middleware.GetAvatarDataURI(ctx); avatarDataURI != "" {
+							@avatar.Image(avatar.ImageProps{
+								Src: avatarDataURI,
+								Alt: "User Avatar",
+							})
+						} else {
+							@avatar.Fallback() {
+								{ avatar.Initials(auth.GetUserDisplayName(user)) }
+							}
+						}
+					}
+					<div class="flex-1 min-w-0">
+						<div class="text-sm font-medium text-foreground truncate">{ auth.GetUserDisplayName(user) }</div>
+						<div class="text-xs text-muted-foreground">{ user.Email }</div>
+					</div>
+					<!-- Dark mode toggle -->
+					@button.Button(button.Props{
+						Variant: button.VariantGhost,
+						Size:    button.SizeIcon,
+						Attributes: templ.Attributes{
+							"data-theme-switcher": "true",
+						},
+					}) {
+						<span id="mobile-theme-toggle-icon">
+							@icon.Sun(icon.Props{Size: 16})
+						</span>
+					}
+				</div>
+				<!-- Sign Out Button -->
+				<a href="/logout" class="block w-full">
+					@button.Button(button.Props{
+						Variant: button.VariantOutline,
+						Class:   "w-full justify-start text-destructive hover:bg-destructive/10",
+					}) {
+						@icon.LogOut(icon.Props{Size: 16, Class: "mr-2"})
+						Sign Out
+					}
+				</a>
+			} else {
+				<!-- Dark mode toggle and Sign In -->
+				<div class="flex gap-2">
+					@button.Button(button.Props{
+						Variant: button.VariantOutline,
+						Size:    button.SizeIcon,
+						Attributes: templ.Attributes{
+							"data-theme-switcher": "true",
+						},
+					}) {
+						<span id="mobile-theme-toggle-icon-guest">
+							@icon.Sun(icon.Props{Size: 16})
+						</span>
+					}
+					<a href="/login" class="flex-1">
+						@button.Button(button.Props{
+							Variant: button.VariantDefault,
+							Class:   "w-full justify-start",
+						}) {
+							@icon.LogIn(icon.Props{Size: 16, Class: "mr-2"})
+							Sign In
+						}
+					</a>
+				</div>
+			}
+		</div>
+	</div>
+}
+
+templ Layout(title string, configs ...*LayoutConfig) {
+	// Use provided config if available, otherwise get from context
+	{{ var config *LayoutConfig }}
+	if len(configs) > 0 && configs[0] != nil {
+		{{ config = configs[0] }}
+	} else {
+		{{ config = GetLayoutConfig(ctx) }}
+	}
+	if config == nil {
+		{ children... }
+	} else {
+		<!DOCTYPE html>
+		<html lang="en">
+			<head>
+				<meta charset="UTF-8"/>
+				<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+				<title>{ title } - { config.Brand.Name }</title>
+				<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><polygon points='12 2 2 7 12 12 22 7 12 2'/><polyline points='2 17 12 22 22 17'/><polyline points='2 12 12 17 22 12'/></svg>"/>
+				if len(config.StaticCSS) > 0 {
+					for _, css := range config.StaticCSS {
+						<link rel="stylesheet" href={ css }/>
+					}
+				} else {
+					<script src="https://cdn.tailwindcss.com"></script>
+				}
+				@avatar.Script()
+				@calendar.Script()
+				@carousel.Script()
+				@chart.Script()
+				@code.Script()
+				@datepicker.Script()
+				@drawer.Script()
+				@dropdown.Script()
+				@input.Script()
+				@inputotp.Script()
+				@label.Script()
+				@modal.Script()
+				@popover.Script()
+				@progress.Script()
+				@rating.Script()
+				@selectbox.Script()
+				@slider.Script()
+				@tabs.Script()
+				@tagsinput.Script()
+				@textarea.Script()
+				@toast.Script()
+				@timepicker.Script()
+				@collapsible.Script()
+				@sidebar.Script()
+				@sheet.Script()
+				<script>
+					// Dark mode theme management
+					function getThemePreference() {
+						return localStorage.getItem('themePreference') || 'system';
+					}
+
+					function applyTheme() {
+						const preference = getThemePreference();
+						const isDark = preference === 'dark' || 
+							(preference === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+						
+						document.documentElement.classList.toggle('dark', isDark);
+						updateThemeIcon();
+					}
+
+					function cycleTheme() {
+						const current = getThemePreference();
+						let next;
+						
+						if (current === 'system') {
+							const isDarkNow = window.matchMedia('(prefers-color-scheme: dark)').matches;
+							next = isDarkNow ? 'light' : 'dark';
+						} else {
+							next = current === 'light' ? 'dark' : 'light';
+						}
+						
+						localStorage.setItem('themePreference', next);
+						applyTheme();
+					}
+
+					function updateThemeIcon() {
+						const preference = getThemePreference();
+						const isDark = document.documentElement.classList.contains('dark');
+						const icon = document.getElementById('theme-toggle-icon');
+						
+						if (!icon) return;
+						
+						// Update icon based on current theme
+						if (isDark) {
+							icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
+						} else {
+							icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>';
+						}
+					}
+
+					// Apply theme on page load
+					applyTheme();
+
+					// Listen for system theme changes
+					window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+						if (getThemePreference() === 'system') {
+							applyTheme();
+						}
+					});
+
+					// Event delegation for theme switcher
+					document.addEventListener('click', (e) => {
+						const themeSwitcher = e.target.closest('[data-theme-switcher]');
+						if (themeSwitcher) {
+							e.preventDefault();
+							cycleTheme();
+						}
+					});
+				</script>
+			</head>
+			<body>
+				@config.GetLayout() {
+					{ children... }
+				}
+				<!-- Mobile Footer (only visible on mobile for authenticated users) -->
+				{{ user := auth.GetUserFromContext(ctx) }}
+				if user != nil {
+					@MobileFooter()
+				}
+				for _, js := range config.StaticJS {
+					<script src={ js }></script>
+				}
+				<script>
+					// Re-initialize templUI components after HTMX swaps
+					document.body.addEventListener("htmx:afterSwap", (e) => {
+						if (window.templUI) {
+						Object.values(window.templUI).forEach(comp => {
+							comp.init?.(e.detail.elt);
+						});
+						}
+					});
+
+					// Re-initialize components after out-of-band swaps
+					document.body.addEventListener("htmx:oobAfterSwap", (e) => {
+						if (window.templUI) {
+						Object.values(window.templUI).forEach(comp => {
+							comp.init?.(e.detail.target);
+						});
+						}
+					});
+				</script>
+			</body>
+		</html>
+	}
+}

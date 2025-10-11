@@ -1,0 +1,299 @@
+package datetimescheduler
+
+import (
+	"fmt"
+	"time"
+	"github.com/Lakeshore-Labs/templecho/components/datepicker"
+	"github.com/Lakeshore-Labs/templecho/components/label"
+	"github.com/Lakeshore-Labs/templecho/components/selectbox"
+)
+
+// Props for the datetime scheduler component
+type Props struct {
+	DateFieldName     string
+	TimeFieldName     string
+	RepeatFieldName   string
+	DateLabel         string
+	TimeLabel         string
+	RepeatLabel       string
+	DatePlaceholder   string
+	TimePlaceholder   string
+	RepeatPlaceholder string
+	Required          bool
+}
+
+// DateTimeScheduler renders a comprehensive datetime scheduling component
+templ DateTimeScheduler(props Props) {
+	<div class="space-y-4">
+		<!-- Date, Time and Repeat on same row -->
+		<div class="grid grid-cols-3 gap-4">
+			<!-- Date Selection -->
+			<div class="space-y-2">
+				@label.Label(label.Props{
+					For: props.DateFieldName,
+				}) {
+					if props.DateLabel != "" {
+						{ props.DateLabel }
+					} else {
+						Date
+					}
+				}
+				@datepicker.DatePicker(datepicker.Props{
+					ID:          props.DateFieldName,
+					Name:        props.DateFieldName,
+					Placeholder: getPlaceholder(props.DatePlaceholder, "Select date"),
+					Required:    props.Required,
+				})
+			</div>
+
+			<!-- Time Selection -->
+			<div class="space-y-2">
+				@label.Label(label.Props{
+					For: props.TimeFieldName,
+				}) {
+					if props.TimeLabel != "" {
+						{ props.TimeLabel }
+					} else {
+						Time
+					}
+				}
+				@selectbox.SelectBox(selectbox.Props{
+					ID: props.TimeFieldName,
+				}) {
+					@selectbox.Trigger(selectbox.TriggerProps{
+						Name:     props.TimeFieldName,
+						Required: props.Required,
+					}) {
+						@selectbox.Value(selectbox.ValueProps{
+							Placeholder: getPlaceholder(props.TimePlaceholder, "Select time"),
+						})
+					}
+					@selectbox.Content() {
+						@TimeOptions("")
+					}
+				}
+			</div>
+
+			<!-- Repeat Options -->
+			<div class="space-y-2">
+				@label.Label(label.Props{
+					For: props.RepeatFieldName,
+				}) {
+					if props.RepeatLabel != "" {
+						{ props.RepeatLabel }
+					} else {
+						Repeat
+					}
+				}
+				@selectbox.SelectBox(selectbox.Props{
+					ID: props.RepeatFieldName,
+				}) {
+					@selectbox.Trigger(selectbox.TriggerProps{
+						Name:     props.RepeatFieldName,
+						Required: false,
+					}) {
+						@selectbox.Value(selectbox.ValueProps{
+							Placeholder: getPlaceholder(props.RepeatPlaceholder, "Select repeat"),
+						})
+					}
+					@selectbox.Content() {
+						@RepeatOptions()
+					}
+				}
+			</div>
+		</div>
+	</div>
+}
+
+// TimeOptions renders time selection options with optional selection
+templ TimeOptions(selectedValue string) {
+	for _, group := range getTimeGroups() {
+		@selectbox.Group() {
+			@selectbox.Label() {
+				{ group.Label }
+			}
+			for _, timeOpt := range group.Options {
+				@selectbox.Item(selectbox.ItemProps{Value: timeOpt.Value, Selected: selectedValue == timeOpt.Value}) {
+					{ timeOpt.Display }
+				}
+			}
+		}
+	}
+}
+
+// RepeatOptions renders repeat scheduling options
+templ RepeatOptions() {
+	@selectbox.Item(selectbox.ItemProps{Value: "once"}) {
+		Once (No Repeat)
+	}
+	@selectbox.Item(selectbox.ItemProps{Value: "daily"}) {
+		Daily
+	}
+	@selectbox.Item(selectbox.ItemProps{Value: "weekly"}) {
+		Weekly
+	}
+	@selectbox.Item(selectbox.ItemProps{Value: "monthly"}) {
+		Monthly
+	}
+	@selectbox.Item(selectbox.ItemProps{Value: "weekdays"}) {
+		Weekdays Only
+	}
+	@selectbox.Item(selectbox.ItemProps{Value: "weekends"}) {
+		Weekends Only
+	}
+}
+
+// DateTimeFields renders date and time fields with optional pre-populated values
+templ DateTimeFields(dateValue, timeValue string) {
+	<!-- Date Selection -->
+	<div class="space-y-2">
+		@label.Label(label.Props{
+			For: "schedule_date",
+		}) {
+			Date
+		}
+		@datepicker.DatePicker(datepicker.Props{
+			ID:          "schedule_date",
+			Name:        "schedule_date",
+			Placeholder: "Select date",
+			Required:    true,
+			Value:       getDateValue(dateValue),
+		})
+	</div>
+
+	<!-- Time Selection -->
+	<div class="space-y-2">
+		@label.Label(label.Props{
+			For: "schedule_time",
+		}) {
+			Time
+		}
+		@selectbox.SelectBox(selectbox.Props{
+			ID: "schedule_time",
+		}) {
+			@selectbox.Trigger(selectbox.TriggerProps{
+				Name:     "schedule_time",
+				Required: true,
+			}) {
+				@selectbox.Value(selectbox.ValueProps{
+					Placeholder: getTimePlaceholder(timeValue),
+				})
+			}
+			@selectbox.Content() {
+				@TimeOptions(timeValue)
+			}
+		}
+	</div>
+}
+
+// Helper function to convert date string to time.Time for datepicker
+func getDateValue(dateStr string) time.Time {
+	if dateStr == "" {
+		return time.Time{}
+	}
+	if t, err := time.Parse("2006-01-02", dateStr); err == nil {
+		return t
+	}
+	return time.Time{}
+}
+
+// convertTimeToDisplay converts 24h format to 12h format for display
+func convertTimeToDisplay(timeStr string) string {
+	if timeStr == "" {
+		return "Select time"
+	}
+	// Convert 15:04 to 3:04 PM format
+	if t, err := time.Parse("15:04", timeStr); err == nil {
+		return t.Format("3:04 PM")
+	}
+	return timeStr
+}
+
+// getTimePlaceholder returns the appropriate placeholder for the time field
+func getTimePlaceholder(timeValue string) string {
+	if timeValue != "" {
+		return convertTimeToDisplay(timeValue)
+	}
+	return "Select time"
+}
+
+
+type TimeOption struct {
+	Value   string
+	Display string
+}
+
+type TimeGroup struct {
+	Label   string
+	Options []TimeOption
+}
+
+// getTimeGroups generates time options programmatically
+func getTimeGroups() []TimeGroup {
+	return []TimeGroup{
+		{
+			Label: "Morning",
+			Options: generateTimeOptions(6, 11, 30),
+		},
+		{
+			Label: "Afternoon", 
+			Options: generateTimeOptions(12, 17, 30),
+		},
+		{
+			Label: "Evening",
+			Options: generateTimeOptions(18, 22, 0),
+		},
+	}
+}
+
+// generateTimeOptions creates time options for a given hour range
+func generateTimeOptions(startHour, endHour, endMinute int) []TimeOption {
+	var options []TimeOption
+	
+	for hour := startHour; hour <= endHour; hour++ {
+		maxMinute := 30
+		if hour == endHour {
+			maxMinute = endMinute
+		}
+		
+		for minute := 0; minute <= maxMinute; minute += 30 {
+			value := fmt.Sprintf("%02d:%02d", hour, minute)
+			display := formatTimeDisplay(hour, minute)
+			options = append(options, TimeOption{
+				Value:   value,
+				Display: display,
+			})
+		}
+	}
+	
+	return options
+}
+
+// formatTimeDisplay converts 24h time to 12h display format
+func formatTimeDisplay(hour, minute int) string {
+	period := "AM"
+	displayHour := hour
+	
+	if hour >= 12 {
+		period = "PM"
+		if hour > 12 {
+			displayHour = hour - 12
+		}
+	}
+	if hour == 0 {
+		displayHour = 12
+	}
+	
+	if minute == 0 {
+		return fmt.Sprintf("%d:00 %s", displayHour, period)
+	}
+	return fmt.Sprintf("%d:%02d %s", displayHour, minute, period)
+}
+
+// Helper function to get placeholder text
+func getPlaceholder(custom, fallback string) string {
+	if custom != "" {
+		return custom
+	}
+	return fallback
+}
